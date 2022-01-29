@@ -68,13 +68,13 @@ def main():
             current_y = IMAGE_SIZE - y - 1
             gradient.putpixel((0, current_y), current_color)
         alpha = gradient.resize(playlist_cover.size)
-        black_im = Image.new('RGBA', (IMAGE_SIZE, IMAGE_SIZE), color=0)  # i.e. black
+        black_im = Image.new('RGBA', (IMAGE_SIZE, IMAGE_SIZE), color=0)
         black_im.putalpha(alpha)
         playlist_cover = Image.alpha_composite(playlist_cover, black_im)
 
         # Adding the text
         draw = ImageDraw.Draw(playlist_cover)
-        font = ImageFont.truetype('./fonts/Roboto-Bold.ttf', 100)
+        font = ImageFont.truetype('./fonts/Montserrat-Bold.ttf', 120)
         draw.text(xy=(ARTIST_IMAGE_SIZE, IMAGE_SIZE - 50), text=playlist_name, fill=(255, 255, 255), anchor="ms", font=font, align="center")
 
         # Converting back to RGB
