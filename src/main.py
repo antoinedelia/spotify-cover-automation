@@ -1,12 +1,13 @@
+import base64
 from collections import Counter
-import time
-from loguru import logger
-from spotify import Spotify
-from dotenv import load_dotenv
-from PIL import Image
-import requests
 from io import BytesIO
 import os
+import time
+from spotify import Spotify
+from dotenv import load_dotenv
+from loguru import logger
+from PIL import Image
+import requests
 
 load_dotenv()
 
@@ -15,11 +16,12 @@ SPOTIFY_PLAYLISTS_URIS = [
     "https://open.spotify.com/playlist/0JP3smzah2mTnxIZIVjVX0?si=e33aaca9d1334dc6"
 ]
 ARTIST_IMAGE_SIZE = 640
+scopes = "user-library-read playlist-modify-public playlist-modify-private playlist-read-private ugc-image-upload"
 
 
 def main():
     sp = Spotify()
-    sp.authenticate_oauth()
+    sp.authenticate_oauth(scopes)
 
     for playlist_uri in SPOTIFY_PLAYLISTS_URIS:
         playlist_name = sp.get_playlist_name_by_uri(playlist_uri)
@@ -38,7 +40,7 @@ def main():
                     }
                 )
 
-        result = Image.new("RGB", (ARTIST_IMAGE_SIZE * 2, ARTIST_IMAGE_SIZE * 2))
+        playlist_cover = Image.new("RGB", (ARTIST_IMAGE_SIZE * 2, ARTIST_IMAGE_SIZE * 2))
 
         counter = Counter([artist["name"] for artist in artists])
         four_most_common = counter.most_common(4)
@@ -53,10 +55,16 @@ def main():
             x = index // 2 * ARTIST_IMAGE_SIZE
             y = index % 2 * ARTIST_IMAGE_SIZE
             w, h = img.size
-            result.paste(img, (x, y, x + w, y + h))
+            playlist_cover.paste(img, (x, y, x + w, y + h))
 
-    logger.info("Saving image...")
-    result.save(os.path.expanduser(f"{playlist_name}.jpg"))
+        logger.info("Saving image...")
+        playlist_cover.save(os.path.expanduser(f"{playlist_name}.jpg"))
+
+        logger.info("Updating playlist cover...")
+        buffered = BytesIO()
+        playlist_cover.save(buffered, format="JPEG")
+        playlist_cover_string = base64.b64encode(buffered.getvalue())
+        sp.update_playlist_cover_image(playlist_uri, playlist_cover_string)
 
 
 if __name__ == "__main__":

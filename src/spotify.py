@@ -1,18 +1,20 @@
-import spotipy
-from spotipy.oauth2 import SpotifyClientCredentials
 from loguru import logger
+import spotipy
+from spotipy.oauth2 import SpotifyOAuth
 
 
 class Spotify:
     def __init__(self) -> None:
         self.client: spotipy.Spotify = None
 
-    def authenticate_oauth(self) -> bool:
+    def authenticate_oauth(self, scopes: str) -> bool:
         """
         Authenticate to Spotify
+        :param scopes: comma separated string of scopes
+        :type scopes: str
         :return: None
         """
-        self.client = spotipy.Spotify(auth_manager=SpotifyClientCredentials())
+        self.client = spotipy.Spotify(auth_manager=SpotifyOAuth(scope=scopes))
         logger.info("Successfully authenticated!")
         return True
 
@@ -20,6 +22,7 @@ class Spotify:
         """
         Get playlist by uri
         :param uri: playlist uri
+        :type uri: str
         :return: playlist
         """
         playlist_id = uri.split("/")[-1]
@@ -42,6 +45,7 @@ class Spotify:
         """
         Get playlist name by uri
         :param uri: playlist uri
+        :type uri: str
         :return: playlist name
         """
         playlist_id = uri.split("/")[-1]
@@ -59,3 +63,16 @@ class Spotify:
         """
         result = self.client.artist(artist_id=artist_id)
         return result["images"][0]["url"]
+
+    def update_playlist_cover_image(self, uri: str, image) -> None:
+        """
+        Update the cover image of a playlist
+        :param uri: playlist uri
+        :type uri: str
+        :param image: image to replace
+        """
+        playlist_id = uri.split("/")[-1]
+        if "?" in playlist_id:
+            playlist_id = playlist_id.split("?")[0]
+
+        self.client.playlist_upload_cover_image(playlist_id=playlist_id, image_b64=image)
