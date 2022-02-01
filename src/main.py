@@ -82,11 +82,11 @@ def main():
         logger.info("Saving image...")
         playlist_cover.save(os.path.expanduser(f"{playlist_name}.jpg"))
 
-        # logger.info("Updating playlist cover...")
-        # buffered = BytesIO()
-        # playlist_cover.save(buffered, format="JPEG")
-        # playlist_cover_string = base64.b64encode(buffered.getvalue())
-        # sp.update_playlist_cover_image(playlist_uri, playlist_cover_string)
+        logger.info("Updating playlist cover...")
+        buffered = BytesIO()
+        playlist_cover.save(buffered, format="JPEG")
+        playlist_cover_string = base64.b64encode(buffered.getvalue())
+        sp.update_playlist_cover_image(playlist_uri, playlist_cover_string)
 
 
 if __name__ == "__main__":
